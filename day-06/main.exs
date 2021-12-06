@@ -1,36 +1,30 @@
 days = 256
-first_gestation = 8
-gestation = 6
 
-#"3,4,3,1,2"
-File.read!("data.txt")
-|> String.trim()
-|> String.split(",")
+IO.stream(:stdio, :line)
+|> Stream.map(&String.trim/1)
+|> Stream.map(&String.split(&1, ","))
+|> Enum.at(0)
 |> Enum.map(&String.to_integer/1)
-#|> (fn(ages) ->
+|> (fn(ages) ->
+  Enum.map(0..8, fn(days) ->
+    Enum.reduce(ages, 0, fn(age, total) ->
+      total + if age == days,
+        do: 1,
+        else: 0
+    end)
+  end)
+end).()
+# |> (fn(ages) ->
 #  IO.inspect({'Initial state:', ages}, charlist: :as_lists)
 #  ages
-#end).()
+# end).()
 |> (fn(ages) ->
-  ages = Enum.reduce(1..days, ages, fn(_, ages) ->
-    ages = Enum.map(ages, fn(age) ->
-      age - 1
-    end)
-    births = Enum.reduce(ages, 0, fn(age, births) ->
-      births + if age < 0, do: 1, else: 0
-    end)
-    new_fish = if births == 0,
-      do: [],
-      else: Enum.map(0..births-1, fn(_) ->
-        first_gestation
-      end)
-    ages = Enum.map(ages, fn(age) ->
-      if age < 0, do: gestation, else: age
-    end) ++ new_fish
-#    IO.inspect({'After #{day} days:', ages}, charlist: :as_lists)
+  Enum.reduce(1..days, ages, fn(_, [d0, d1, d2, d3, d4, d5, d6, d7, d8]) ->
+    ages = [d1, d2, d3, d4, d5, d6, d0 + d7, d8, d0]
+    # IO.inspect({'After #{day} days:', ages}, charlist: :as_lists)
     ages
   end)
 end).()
-#|> IO.inspect(charlist: :as_lists)
-|> length()
+# |> IO.inspect(charlist: :as_lists)
+|> Enum.reduce(0, fn(count, total) -> total + count end)
 |> IO.inspect(charlist: :as_lists)
